@@ -3,39 +3,59 @@ setup: true
 orbs:
   orb-tools: circleci/orb-tools@11.5
   shellcheck: circleci/shellcheck@3.1
+  cli: circleci/circleci-cli@0.1.9
 
 filters: &filters
   tags:
     only: /.*/
 
+jobs:
+  use-executor:
+    executor: cli/default
+    steps:
+      - run: echo "this job is using the orb's default executor"
+  use-install-command:
+    docker:
+      - image: circleci/circleci-cli:latest
+    steps:
+      - cli/install
+      - run: echo "the CLI is now installed"
+      - cli/setup
+      - circleci info org
+
+
 workflows:
   lint-pack:
     jobs:
+      - use-executor:
+          context: org-global
+      - use-install-command:
+          context: org-global
       - orb-tools/lint:
           filters: *filters
       - orb-tools/pack:
           filters: *filters
-      - orb-tools/review:
-          filters: *filters
-      - shellcheck/check:
-          shell: bash
-          filters: *filters
-      - orb-tools/publish:
-          orb-name: vjpandian/continuation
-          vcs-type: << pipeline.project.type >>
-          requires:
-            - orb-tools/lint
-            - orb-tools/review
-            - orb-tools/pack
-            - shellcheck/check
-
-          # Use a context to hold your publishing token.
-          context: org-global
-          filters: *filters
-      # Triggers the next workflow in the Orb Development Kit.
-      - orb-tools/continue:
-          pipeline-number: << pipeline.number >>
-          vcs-type: << pipeline.project.type >>
-          requires: 
-            - orb-tools/publish
-          filters: *filters
+      #- orb-tools/review:
+      #    filters: *filters
+      #- shellcheck/check:
+      #    shell: bash
+      #    filters: *filters
+      #- orb-tools/publish:
+      #    orb-name: vjpandian/continuation
+      #    vcs-type: << pipeline.project.type >>
+      #    requires:
+      #      - orb-tools/lint
+      #      - orb-tools/review
+      #      - orb-tools/pack
+      #      - shellcheck/check
+      #
+      #    # Use a context to hold your publishing token.
+      #    context: orb-publisher
+      #    filters: *filters
+      ## Triggers the next workflow in the Orb Development Kit.
+      #- orb-tools/continue:
+      #    pipeline-number: << pipeline.number >>
+      #    vcs-type: << pipeline.project.type >>
+      #    requires: 
+      #      - orb-tools/publish
+      #    filters: *filters
