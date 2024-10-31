@@ -1,0 +1,71 @@
+description: >
+  Make a request to the API to continue the pipeline.
+
+
+docker:
+  - image: <<parameters.registry>>/<<parameters.image>>:<<parameters.tag>>
+    auth:
+      username: <<parameters.dockerhub-username>>
+      password: <<parameters.dockerhub-password>>
+
+resource_class: << parameters.resource_class >>
+
+
+parameters:
+  configuration_path:
+    type: string
+    description: "The path to the configuration that will be passed to the continue API"
+  parameters:
+    type: string
+    description: "The parameters used for the pipeline. This can either be a JSON object containing parameters or a path to a file containing a JSON object with parameters"
+    default: "{}"
+  registry:
+    type: string
+    description: "Registry for pulling the image"
+    default: cimg
+  image:
+    type: string
+    default: python
+    description: "image name in the Dockerhub registry"
+  circleci_domain:
+    type: string
+    description: "The domain of the CircleCI installation - defaults to circleci.com. (Only necessary for CircleCI Server users)"
+    default: "circleci.com"
+  dockerhub-username:
+    type: string
+    description: "Username for Dockerhub"
+    default: DOCKERHUB_USERNAME
+  dockerhub-password:
+    type: string
+    description: "Credentials for Dockerhub"
+    default: DOCKERHUB_PASSWORD
+  checkout:
+    type: boolean
+    description: "Whether to run an optional checkout step before continuing"
+    default: true
+  workspace_path:
+    type: string
+    description: "Path to attach the workspace to"
+    default: ""
+  resource_class:
+    type: string
+    description: "Resource class to use"
+    default: "small"
+
+steps:
+  - when:
+      condition:
+        equal: [ true, << parameters.checkout >> ]
+      steps:
+        - checkout
+  - when:
+      condition:
+        not:
+          equal: [ "", << parameters.workspace_path >> ]
+      steps:
+        - attach_workspace:
+            at: << parameters.workspace_path >>
+  - continue:
+      configuration_path: << parameters.configuration_path >>
+      parameters: << parameters.parameters >>
+      circleci_domain: << parameters.circleci_domain >>
