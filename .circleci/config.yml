@@ -20,7 +20,8 @@ jobs:
     steps:
       - cli/install
       - run: echo "the CLI is now installed"
-      - cli/setup
+      - cli/setup:
+          token: CIRCLE_TOKEN
       - run: circleci info org
 
 
