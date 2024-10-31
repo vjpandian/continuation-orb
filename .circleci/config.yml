@@ -21,7 +21,7 @@ jobs:
       - cli/install
       - run: echo "the CLI is now installed"
       - cli/setup
-      - circleci info org
+      - run: circleci info org
 
 
 workflows:
