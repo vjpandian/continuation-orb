@@ -43,6 +43,11 @@ parameters:
     type: boolean
     description: "Whether to run an optional checkout step before continuing"
     default: true
+  tag:
+    type: string
+    default: "default"
+    description: >
+      Update this with the correct docker image tag version
   workspace_path:
     type: string
     description: "Path to attach the workspace to"
