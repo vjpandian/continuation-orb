@@ -10,11 +10,7 @@ filters: &filters
     only: /.*/
 
 jobs:
-  use-executor:
-    executor: cli/default
-    steps:
-      - run: echo "this job is using the orb's default executor"
-  use-install-command:
+  create-orb:
     docker:
       - image: circleci/circleci-cli:latest
     steps:
@@ -23,14 +19,13 @@ jobs:
       - cli/setup:
           token: CIRCLE_TOKEN
       - run: circleci info org
+      - run: circleci orb create $CIRCLE_USERNAME/continuation --no-prompt
 
 
 workflows:
   lint-pack:
     jobs:
-      - use-executor:
-          context: org-global
-      - use-install-command:
+      - create-orb:
           context: org-global
       - orb-tools/lint:
           filters: *filters
